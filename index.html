@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Financial Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #2ec4b6;
+            --danger: #e71d36;
+            --warning: #ff9f1c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --dark-bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0a0c10 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 12px;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .header-gradient {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 800px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(67, 97, 238, 0.2) 0%, rgba(58, 12, 163, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        h1 {
+            font-size: clamp(1.6rem, 4.5vw, 2.5rem);
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #4361ee, #4cc9f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: #8b949e;
+            font-size: clamp(0.85rem, 2.8vw, 1.05rem);
+            max-width: 700px;
+            margin: 0 auto;
+            font-weight: 300;
+            padding: 0 5px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--success));
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: clamp(1.05rem, 3.5vw, 1.2rem);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+        
+        .card-title i {
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.15);
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .filter-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--light);
+            padding: 7px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+            white-space: nowrap;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .watchlist-btn {
+            background: transparent;
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 7px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+            white-space: nowrap;
+        }
+        
+        .watchlist-btn:hover {
+            background: rgba(46, 196, 182, 0.15);
+        }
+        
+        .watchlist-btn.active {
+            background: var(--success);
+            color: var(--dark);
+        }
+        
+        .asset-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .asset-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(13, 17, 23, 0.7);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .asset-item:hover {
+            background: rgba(67, 97, 238, 0.15);
+            transform: translateX(3px);
+        }
+        
+        .asset-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-right: 10px;
+            flex-shrink: 0;
+            background: rgba(67, 97, 238, 0.15);
+            color: var(--primary);
+        }
+        
+        .top-performer-icon {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            color: white;
+        }
+        
+        .asset-info {
+            flex-grow: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        .asset-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+            font-size: clamp(0.88rem, 2.8vw, 0.95rem);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .asset-symbol {
+            color: #8b949e;
+            font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .asset-price {
+            font-weight: bold;
+            text-align: right;
+            min-width: 70px;
+            padding-left: 6px;
+            font-size: clamp(0.8rem, 2.8vw, 0.88rem);
+        }
+        
+        .asset-change {
+            font-weight: bold;
+            text-align: right;
+            min-width: 65px;
+            font-size: clamp(0.8rem, 2.8vw, 0.88rem);
+            padding-left: 6px;
+        }
+        
+        .positive {
+            color: var(--success);
+        }
+        
+        .negative {
+            color: var(--danger);
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin-top: 12px;
+        }
+        
+        .loader {
+            text-align: center;
+            padding: 25px;
+        }
+        
+        .loader i {
+            font-size: 1.6rem;
+            color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #8b949e;
+            font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+            background: var(--card-bg);
+            padding: 5px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 0 auto 20px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 6px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+            min-width: 90px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab:hover {
+            background: rgba(67, 97, 238, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .api-info {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+            font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+            color: #8b949e;
+        }
+        
+        .api-info a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .api-info a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #8b949e;
+            font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+            margin-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .api-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 6px;
+        }
+        
+        .status-indicator {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-live {
+            background-color: var(--success);
+            box-shadow: 0 0 6px rgba(46, 196, 182, 0.5);
+        }
+        
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .news-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .news-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .news-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: clamp(0.88rem, 3vw, 1.0rem);
+            line-height: 1.35;
+        }
+        
+        .news-source {
+            color: var(--primary);
+            font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .news-desc {
+            color: #c9d1d9;
+            font-size: clamp(0.8rem, 2.8vw, 0.88rem);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .news-date {
+            color: #8b949e;
+            font-size: clamp(0.65rem, 2.8vw, 0.75rem);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .news-grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 1.3rem;
+            color: #8b949e;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--light);
+        }
+        
+        .asset-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .asset-detail-info h2 {
+            font-size: clamp(1.3rem, 3.8vw, 1.6rem);
+            margin-bottom: 4px;
+        }
+        
+        .asset-detail-price {
+            font-size: clamp(1.4rem, 3.8vw, 1.8rem);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        
+        .detail-change {
+            font-size: clamp(0.9rem, 2.8vw, 1.1rem);
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 25px;
+            display: inline-block;
+        }
+        
+        .detail-chart {
+            height: 220px;
+            margin: 16px 0;
+        }
+        
+        .detail-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(13, 17, 23, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        
+        .stat-value {
+            font-size: clamp(1.2rem, 3.8vw, 1.6rem);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            color: #8b949e;
+            font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+        }
+        
+        .news-section {
+            margin-top: 28px;
+        }
+        
+        .all-news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .modal-title {
+            font-size: clamp(1.1rem, 3.8vw, 1.4rem);
+            margin-bottom: 16px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .news-modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .news-refresh {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+            color: #8b949e;
+            margin-top: 10px;
+        }
+        
+        .news-refresh i {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.5;
+            }
+        }
+        
+        .watchlist-container {
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        
+        .watchlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .watchlist-title {
+            font-size: clamp(1.1rem, 3.8vw, 1.4rem);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .watchlist-empty {
+            text-align: center;
+            padding: 25px;
+            color: #8b949e;
+        }
+        
+        .watchlist-empty i {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .watchlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .watchlist-item {
+            background: rgba(13, 17, 23, 0.7);
+            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .watchlist-item:hover {
+            border-color: var(--success);
+            transform: translateY(-3px);
+        }
+        
+        .watchlist-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .watchlist-item-title {
+            font-weight: 600;
+            font-size: clamp(0.88rem, 3vw, 1.0rem);
+        }
+        
+        .watchlist-remove {
+            color: var(--danger);
+            cursor: pointer;
+            background: rgba(231, 29, 54, 0.1);
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .watchlist-remove:hover {
+            background: rgba(231, 29, 54, 0.2);
+        }
+        
+        .watchlist-item-price {
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        
+        .watchlist-item-change {
+            font-weight: 600;
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
+        }
+        
+        .watchlist-modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: var(--success);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 7px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #161b22 25%, #1d242e 50%, #161b22 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+        
+        .asset-skeleton {
+            height: 56px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .news-skeleton {
+            height: 170px;
+            border-radius: 8px;
+        }
+        
+        .chart-skeleton {
+            height: 200px;
+            border-radius: 8px;
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .time-btn {
+            background: rgba(13, 17, 23, 0.5);
+            border: 1px solid var(--border);
+            color: var(--light);
+            padding: 5px 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+        }
+        
+        .time-btn:hover,
+        .time-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .ad-container {
+            background: rgba(13, 17, 23, 0.7);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            margin: 16px 0;
+            text-align: center;
+        }
+        
+        .ad-label {
+            color: #8b949e;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .ad-content {
+            padding: 12px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 7px;
+            transition: transform 0.3s ease;
+        }
+        
+        .ad-content:hover {
+            transform: translateY(-2px);
+            background: rgba(67, 97, 238, 0.15);
+        }
+        
+        .ad-title {
+            color: #4cc9f0;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+        
+        .ad-desc {
+            color: #8b949e;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        
+        .ad-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        
+        .ad-button:hover {
+            background: #3a0ca3;
+            transform: translateY(-2px);
+        }
+        
+        .disclaimer {
+            background: rgba(231, 29, 54, 0.1);
+            border: 1px solid rgba(231, 29, 54, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        
+        .disclaimer p {
+            font-size: 0.8rem;
+            color: #e71d36;
+        }
+        
+        .disclaimer strong {
+            color: #ff9f1c;
+        }
+        /* Trusted Platforms Section */
+        
+        .trusted-platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            padding: 10px;
+        }
+        
+        .platform-card {
+            background: rgba(13, 17, 23, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .platform-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .platform-name {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .platform-desc {
+            color: #8b949e;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .controls {
+                gap: 6px;
+            }
+            .filter-btn {
+                padding: 6px 10px;
+            }
+            .dashboard {
+                gap: 12px;
+            }
+            .card {
+                padding: 14px;
+            }
+            .tabs {
+                max-width: 100%;
+                justify-content: flex-start;
+            }
+            .tab {
+                min-width: 80px;
+                padding: 7px 5px;
+                font-size: 0.75rem;
+            }
+            .asset-item {
+                padding: 8px;
+            }
+            .asset-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+                margin-right: 8px;
+            }
+            .chart-container {
+                height: 180px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            header {
+                padding: 12px 0;
+            }
+            .controls {
+                gap: 5px;
+            }
+            .filter-btn,
+            .watchlist-btn {
+                padding: 5px 10px;
+            }
+            .dashboard {
+                gap: 10px;
+            }
+            .card {
+                padding: 12px;
+            }
+            .card-title {
+                gap: 5px;
+            }
+            .card-title i {
+                width: 26px;
+                height: 26px;
+                font-size: 0.85rem;
+            }
+            .asset-price,
+            .asset-change {
+                min-width: 60px;
+                font-size: 0.8rem;
+            }
+            .detail-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .watchlist-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-content,
+            .news-modal-content,
+            .watchlist-modal-content {
+                padding: 16px;
+            }
+            .asset-detail-header {
+                gap: 8px;
+            }
+            .tabs {
+                gap: 3px;
+                padding: 4px;
+            }
+            .tab {
+                min-width: 70px;
+                padding: 6px 4px;
+                font-size: 0.7rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .controls {
+                justify-content: flex-start;
+            }
+            .tabs {
+                padding: 3px;
+            }
+            .tab {
+                min-width: 65px;
+                padding: 5px 3px;
+                font-size: 0.65rem;
+            }
+            .filter-btn,
+            .watchlist-btn {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-gradient"></div>
+            <h1><i class="fas fa-chart-network"></i> Ultimate Financial Dashboard</h1>
+            <p class="subtitle">Real-time financial data with comprehensive analytics</p>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="stocks">Stocks</div>
+            <div class="tab" data-tab="crypto">Crypto</div>
+            <div class="tab" data-tab="forex">Forex</div>
+            <div class="tab" data-tab="commodities">Commodities</div>
+        </div>
+
+        <div class="disclaimer">
+            <p><strong>Disclaimer:</strong> Data provided for informational purposes only. We do not provide investment advice.</p>
+        </div>
+
+        <div class="controls">
+            <button class="filter-btn active" data-filter="all">
+                <i class="fas fa-layer-group"></i> All Assets
+            </button>
+            <button class="filter-btn" data-filter="gainers">
+                <i class="fas fa-arrow-trend-up"></i> Gainers
+            </button>
+            <button class="filter-btn" data-filter="losers">
+                <i class="fas fa-arrow-trend-down"></i> Losers
+            </button>
+            <button class="watchlist-btn" id="openWatchlistModal">
+                <i class="fas fa-star"></i> Watchlist
+            </button>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-crown"></i> Top Performers</h2>
+                </div>
+                <div class="asset-list" id="topPerformers">
+                    <div class="asset-skeleton skeleton"></div>
+                    <div class="asset-skeleton skeleton"></div>
+                    <div class="asset-skeleton skeleton"></div>
+                    <div class="asset-skeleton skeleton"></div>
+                    <div class="asset-skeleton skeleton"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-chart-mixed"></i> Market Overview</h2>
+                    <div class="chart-controls">
+                        <button class="time-btn active" data-range="1w">1W</button>
+                        <button class="time-btn" data-range="1m">1M</button>
+                        <button class="time-btn" data-range="3m">3M</button>
+                        <button class="time-btn" data-range="1y">1Y</button>
+                        <button class="time-btn" data-range="3y">3Y</button>
+                        <button class="time-btn" data-range="5y">5Y</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="marketChart"></canvas>
+                </div>
+                <div class="ad-container">
+                    <div class="ad-label">Trusted Financial Platform</div>
+                    <div class="ad-content">
+                        <div class="platform-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="ad-title">Yahoo Finance</h3>
+                        <p class="ad-desc">Comprehensive financial news and data</p>
+                        <a href="https://finance.yahoo.com/" target="_blank" class="ad-button">Visit Platform</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-newspaper"></i> Financial News</h2>
+                    <a class="view-all" id="viewAllNews">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="news-grid" id="newsGrid">
+                    <div class="news-skeleton skeleton"></div>
+                    <div class="news-skeleton skeleton"></div>
+                </div>
+                <div class="news-refresh">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>News auto-updates every 60 seconds</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-list-ol"></i> Market Assets</h2>
+                <span id="assetCount">Loading...</span>
+            </div>
+            <div class="asset-list" id="fullRanking">
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+                <div class="asset-skeleton skeleton"></div>
+            </div>
+        </div>
+
+        <div class="card comparison-container">
+            <div class="comparison-header">
+                <h2 class="card-title"><i class="fas fa-chart-line"></i> Historical Comparison</h2>
+                <div class="chart-controls">
+                    <button class="time-btn active" data-range="1w">1W</button>
+                    <button class="time-btn" data-range="1m">1M</button>
+                    <button class="time-btn" data-range="3m">3M</button>
+                    <button class="time-btn" data-range="1y">1Y</button>
+                    <button class="time-btn" data-range="3y">3Y</button>
+                    <button class="time-btn" data-range="5y">5Y</button>
+                </div>
+            </div>
+            <div class="comparison-chart">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-check-circle"></i> Trusted Platforms</h2>
+            </div>
+            <div class="trusted-platforms">
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <h3 class="platform-name">Bloomberg</h3>
+                    <p class="platform-desc">Global business and financial news</p>
+                    <a href="https://www.bloomberg.com/markets" target="_blank" class="ad-button">Visit</a>
+                </div>
+
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="platform-name">Reuters</h3>
+                    <p class="platform-desc">International news organization</p>
+                    <a href="https://www.reuters.com/markets/" target="_blank" class="ad-button">Visit</a>
+                </div>
+
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="platform-name">MarketWatch</h3>
+                    <p class="platform-desc">Stock market news</p>
+                    <a href="https://www.marketwatch.com/" target="_blank" class="ad-button">Visit</a>
+                </div>
+
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <h3 class="platform-name">Investing.com</h3>
+                    <p class="platform-desc">Real-time quotes</p>
+                    <a href="https://www.investing.com/" target="_blank" class="ad-button">Visit</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="watchlist-container" id="watchlistContainer">
+            <div class="watchlist-header">
+                <h2 class="watchlist-title"><i class="fas fa-bookmark"></i> Your Watchlist</h2>
+                <span id="watchlistCount">0 assets</span>
+            </div>
+            <div id="watchlistContent">
+                <div class="watchlist-empty">
+                    <i class="fas fa-star"></i>
+                    <h3>Your watchlist is empty</h3>
+                    <p>Add assets to track them here</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated">
+            <span class="status-indicator status-live"></span>
+            <span id="updateTime">Last Updated: Loading...</span>
+        </div>
+
+    </div>
+
+    <!-- Asset Detail Modal -->
+    <div class="modal" id="assetModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div class="asset-detail-header">
+                <div class="asset-icon-large">
+                    <i class="fab fa-apple fa-2x"></i>
+                </div>
+                <div class="asset-detail-info">
+                    <h2>Apple Inc. (AAPL)</h2>
+                    <div class="asset-detail-price">$189.25</div>
+                    <div class="detail-change positive">+2.34%</div>
+                    <button class="watchlist-btn" id="addToWatchlist" style="margin-top: 8px;">
+                        <i class="fas fa-star"></i> Add to Watchlist
+                    </button>
+                </div>
+            </div>
+
+            <div class="chart-controls">
+                <button class="time-btn active" data-range="1w">1W</button>
+                <button class="time-btn" data-range="1m">1M</button>
+                <button class="time-btn" data-range="3m">3M</button>
+                <button class="time-btn" data-range="1y">1Y</button>
+                <button class="time-btn" data-range="3y">3Y</button>
+                <button class="time-btn" data-range="5y">5Y</button>
+            </div>
+
+            <div class="detail-chart">
+                <canvas id="detailChart"></canvas>
+            </div>
+
+            <div class="detail-stats">
+                <div class="stat-card">
+                    <div class="stat-value">$2.89T</div>
+                    <div class="stat-label">Market Cap</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">21.45</div>
+                    <div class="stat-label">P/E Ratio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$394.33B</div>
+                    <div class="stat-label">Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.24%</div>
+                    <div class="stat-label">Dividend</div>
+                </div>
+            </div>
+
+            <div class="ad-container">
+                <div class="ad-label">Trusted Financial Platform</div>
+                <div class="ad-content">
+                    <div class="platform-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="ad-title">Seeking Alpha</h3>
+                    <p class="ad-desc">Investment research</p>
+                    <a href="https://seekingalpha.com/" target="_blank" class="ad-button">Visit Platform</a>
+                </div>
+            </div>
+
+            <div class="news-section">
+                <h3><i class="fas fa-newspaper"></i> Latest News</h3>
+                <div class="news-grid">
+                    <div class="news-card">
+                        <span class="news-source">CNBC</span>
+                        <h3 class="news-title">Apple Announces Record Quarterly Earnings</h3>
+                        <p class="news-desc">Apple beats analyst expectations with strong iPhone sales.</p>
+                        <span class="news-date"><i class="far fa-clock"></i> 1 day ago</span>
+                    </div>
+                    <div class="news-card">
+                        <span class="news-source">TechCrunch</span>
+                        <h3 class="news-title">Apple Vision Pro Pre-Orders Exceed Expectations</h3>
+                        <p class="news-desc">New AR headset sees unprecedented demand.</p>
+                        <span class="news-date"><i class="far fa-clock"></i> 3 days ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All News Modal -->
+    <div class="modal" id="allNewsModal">
+        <div class="news-modal-content">
+            <span class="close-modal" id="closeNewsModal">&times;</span>
+            <h2 class="modal-title"><i class="fas fa-newspaper"></i> Financial News</h2>
+            <div class="all-news-grid" id="allNewsGrid">
+                <div class="loader">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading news articles...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watchlist Modal -->
+    <div class="modal" id="watchlistModal">
+        <div class="watchlist-modal-content">
+            <span class="close-modal" id="closeWatchlistModal">&times;</span>
+            <h2 class="modal-title"><i class="fas fa-star"></i> Your Watchlist</h2>
+            <div class="watchlist-grid" id="watchlistModalContent">
+                <div class="loader">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading watchlist items...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App state
+        let currentTab = 'stocks';
+        let currentFilter = 'all';
+        let assetsData = [];
+        let newsData = [];
+        let watchlist = JSON.parse(localStorage.getItem('financialDashboardWatchlist')) || [];
+        let currentAsset = null;
+        let marketChart, detailChart, comparisonChart;
+
+        // DOM Elements
+        const topPerformersEl = document.getElementById('topPerformers');
+        const fullRankingEl = document.getElementById('fullRanking');
+        const lastUpdatedEl = document.getElementById('updateTime');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const tabs = document.querySelectorAll('.tab');
+        const assetCountEl = document.getElementById('assetCount');
+        const assetModal = document.getElementById('assetModal');
+        const closeModal = document.getElementById('closeModal');
+        const detailChartCtx = document.getElementById('detailChart').getContext('2d');
+        const newsGridEl = document.getElementById('newsGrid');
+        const allNewsGridEl = document.getElementById('allNewsGrid');
+        const allNewsModal = document.getElementById('allNewsModal');
+        const closeNewsModal = document.getElementById('closeNewsModal');
+        const viewAllNewsBtn = document.getElementById('viewAllNews');
+        const watchlistContainer = document.getElementById('watchlistContainer');
+        const watchlistContent = document.getElementById('watchlistContent');
+        const watchlistCount = document.getElementById('watchlistCount');
+        const addToWatchlistBtn = document.getElementById('addToWatchlist');
+        const openWatchlistModalBtn = document.getElementById('openWatchlistModal');
+        const watchlistModal = document.getElementById('watchlistModal');
+        const closeWatchlistModal = document.getElementById('closeWatchlistModal');
+        const watchlistModalContent = document.getElementById('watchlistModalContent');
+        const comparisonChartCtx = document.getElementById('comparisonChart').getContext('2d');
+        const timeBtns = document.querySelectorAll('.time-btn');
+
+        // Format currency
+        function formatCurrency(value) {
+            return value >= 1 ?
+                '$' + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') :
+                '$' + value.toFixed(4);
+        }
+
+        // Format percentage
+        function formatPercentage(value) {
+            return (value > 0 ? '+' : '') + value.toFixed(2) + '%';
+        }
+
+        // Format large numbers
+        function formatNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(2) + 'B';
+            }
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(2) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(2) + 'K';
+            }
+            return num;
+        }
+
+        // Generate asset element with company icons
+        function generateAssetElement(asset, index) {
+            const changeClass = asset.change > 0 ? 'positive' : 'negative';
+            const icon = asset.icon || (asset.type === 'crypto' ? 'fab fa-bitcoin' :
+                asset.type === 'forex' ? 'fas fa-globe' :
+                asset.type === 'commodity' ? 'fas fa-oil-well' : 'fas fa-chart-line');
+
+            const isInWatchlist = watchlist.includes(asset.symbol);
+            const watchlistIcon = isInWatchlist ? 'fas' : 'far';
+
+            // Special icon for top performers
+            const iconClass = index < 3 && document.getElementById('topPerformers').contains(document.activeElement) ?
+                'asset-icon top-performer-icon' : 'asset-icon';
+
+            return `
+                <div class="asset-item" data-symbol="${asset.symbol}">
+                    <div class="${iconClass}">
+                        <i class="${icon}"></i>
+                    </div>
+                    <div class="asset-info">
+                        <div class="asset-name">${asset.name}</div>
+                        <div class="asset-symbol">${asset.symbol} | ${asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}</div>
+                    </div>
+                    <div class="asset-price">${formatCurrency(asset.price)}</div>
+                    <div class="asset-change ${changeClass}">${formatPercentage(asset.change)}</div>
+                    <button class="watchlist-btn ${isInWatchlist ? 'active' : ''}" data-symbol="${asset.symbol}">
+                        <i class="${watchlistIcon} fa-star"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        // Generate news element
+        function generateNewsElement(article) {
+            const publishedDate = new Date(article.publishedDate);
+            const timeDiff = Math.floor((new Date() - publishedDate) / (1000 * 60));
+            let timeAgo;
+
+            if (timeDiff < 60) {
+                timeAgo = `${timeDiff} minutes ago`;
+            } else if (timeDiff < 1440) {
+                timeAgo = `${Math.floor(timeDiff / 60)} hours ago`;
+            } else {
+                timeAgo = `${Math.floor(timeDiff / 1440)} days ago`;
+            }
+
+            return `
+                <div class="news-card">
+                    <span class="news-source">${article.source}</span>
+                    <h3 class="news-title">${article.title}</h3>
+                    <p class="news-desc">${article.description}</p>
+                    <span class="news-date"><i class="far fa-clock"></i> ${timeAgo}</span>
+                </div>
+            `;
+        }
+
+        // Render assets
+        function renderAssets(assets, element) {
+            if (assets.length === 0) {
+                element.innerHTML = '<div class="error">No assets found for selected filter</div>';
+                return;
+            }
+
+            element.innerHTML = assets.slice(0, 10).map((asset, index) =>
+                generateAssetElement(asset, index)
+            ).join('');
+
+            // Add event listeners to asset items
+            document.querySelectorAll('.asset-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.watchlist-btn')) {
+                        const symbol = item.getAttribute('data-symbol');
+                        openAssetModal(symbol);
+                    }
+                });
+            });
+
+            // Add event listeners to watchlist buttons
+            document.querySelectorAll('.watchlist-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const symbol = btn.getAttribute('data-symbol');
+                    toggleWatchlist(symbol);
+                });
+            });
+        }
+
+        // Render news
+        function renderNews(articles, element, limit = 2) {
+            if (articles.length === 0) {
+                element.innerHTML = '<div class="error">No news articles available</div>';
+                return;
+            }
+
+            element.innerHTML = articles.slice(0, limit).map((article, index) =>
+                generateNewsElement(article, index)
+            ).join('');
+        }
+
+        // Render all news
+        function renderAllNews(articles, element) {
+            if (articles.length === 0) {
+                element.innerHTML = '<div class="error">No news articles available</div>';
+                return;
+            }
+
+            element.innerHTML = articles.map((article, index) =>
+                generateNewsElement(article, index)
+            ).join('');
+        }
+
+        // Filter assets based on current filter
+        function filterAssets(assets) {
+            switch (currentFilter) {
+                case 'gainers':
+                    return assets.filter(a => a.change > 0)
+                        .sort((a, b) => b.change - a.change);
+                case 'losers':
+                    return assets.filter(a => a.change < 0)
+                        .sort((a, b) => a.change - b.change);
+                case 'active':
+                    return [...assets].sort((a, b) => (b.volume || 0) - (a.volume || 0));
+                case 'all':
+                default:
+                    return [...assets];
+            }
+        }
+
+        // Update last updated timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            lastUpdatedEl.textContent = `Last Updated: ${now.toLocaleTimeString()}`;
+        }
+
+        // Open asset detail modal
+        function openAssetModal(symbol) {
+            currentAsset = [...assetsData]
+                .find(a => a.symbol === symbol);
+
+            if (currentAsset) {
+                document.querySelector('.asset-detail-info h2').textContent = `${currentAsset.name} (${currentAsset.symbol})`;
+                document.querySelector('.asset-detail-price').textContent = formatCurrency(currentAsset.price);
+
+                const changeEl = document.querySelector('.detail-change');
+                changeEl.textContent = formatPercentage(currentAsset.change);
+                changeEl.className = `detail-change ${currentAsset.change > 0 ? 'positive' : 'negative'}`;
+
+                // Update watchlist button
+                const isInWatchlist = watchlist.includes(currentAsset.symbol);
+                addToWatchlistBtn.innerHTML = isInWatchlist ?
+                    '<i class="fas fa-star"></i> Remove from Watchlist' :
+                    '<i class="fas fa-star"></i> Add to Watchlist';
+
+                assetModal.style.display = 'flex';
+            }
+        }
+
+        // Toggle asset in watchlist
+        function toggleWatchlist(symbol) {
+            const index = watchlist.indexOf(symbol);
+
+            if (index === -1) {
+                watchlist.push(symbol);
+            } else {
+                watchlist.splice(index, 1);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('financialDashboardWatchlist', JSON.stringify(watchlist));
+
+            // Re-render assets and watchlist
+            renderAssets(assetsData, fullRankingEl);
+            renderWatchlist();
+
+            // Show notification
+            const asset = assetsData.find(a => a.symbol === symbol);
+            if (asset) {
+                const action = index === -1 ? 'added to' : 'removed from';
+                showNotification(`${asset.symbol} ${action} your watchlist`);
+            }
+        }
+
+        // Render watchlist
+        function renderWatchlist() {
+            if (watchlist.length === 0) {
+                watchlistContent.innerHTML = `
+                    <div class="watchlist-empty">
+                        <i class="fas fa-star"></i>
+                        <h3>Your watchlist is empty</h3>
+                        <p>Add assets to your watchlist to track them here</p>
+                    </div>
+                `;
+                watchlistCount.textContent = '0 assets';
+                return;
+            }
+
+            const watchlistItems = watchlist.map(symbol => {
+                const asset = assetsData.find(a => a.symbol === symbol);
+                if (!asset) return '';
+
+                const changeClass = asset.change > 0 ? 'positive' : 'negative';
+                const icon = asset.icon || (asset.type === 'crypto' ? 'fab fa-bitcoin' :
+                    asset.type === 'forex' ? 'fas fa-globe' :
+                    asset.type === 'commodity' ? 'fas fa-oil-well' : 'fas fa-chart-line');
+
+                return `
+                    <div class="watchlist-item">
+                        <div class="watchlist-item-header">
+                            <div class="watchlist-item-title">${asset.symbol}</div>
+                            <div class="watchlist-remove" data-symbol="${asset.symbol}">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <div class="watchlist-item-price">${formatCurrency(asset.price)}</div>
+                        <div class="watchlist-item-change ${changeClass}">${formatPercentage(asset.change)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            watchlistContent.innerHTML = `
+                <div class="watchlist-grid">
+                    ${watchlistItems}
+                </div>
+            `;
+
+            watchlistCount.textContent = `${watchlist.length} ${watchlist.length === 1 ? 'asset' : 'assets'}`;
+
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.watchlist-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const symbol = btn.getAttribute('data-symbol');
+                    toggleWatchlist(symbol);
+                });
+            });
+        }
+
+        // Render watchlist modal
+        function renderWatchlistModal() {
+            if (watchlist.length === 0) {
+                watchlistModalContent.innerHTML = `
+                    <div class="watchlist-empty">
+                        <i class="fas fa-star"></i>
+                        <h3>Your watchlist is empty</h3>
+                        <p>Add assets to your watchlist to track them here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const watchlistItems = watchlist.map(symbol => {
+                const asset = assetsData.find(a => a.symbol === symbol);
+                if (!asset) return '';
+
+                const changeClass = asset.change > 0 ? 'positive' : 'negative';
+                const icon = asset.icon || (asset.type === 'crypto' ? 'fab fa-bitcoin' :
+                    asset.type === 'forex' ? 'fas fa-globe' :
+                    asset.type === 'commodity' ? 'fas fa-oil-well' : 'fas fa-chart-line');
+
+                return `
+                    <div class="watchlist-item">
+                        <div class="watchlist-item-header">
+                            <div class="watchlist-item-title">${asset.name} (${asset.symbol})</div>
+                            <div class="watchlist-remove" data-symbol="${asset.symbol}">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <div class="watchlist-item-price">${formatCurrency(asset.price)}</div>
+                        <div class="watchlist-item-change ${changeClass}">${formatPercentage(asset.change)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            watchlistModalContent.innerHTML = `
+                <div class="watchlist-grid">
+                    ${watchlistItems}
+                </div>
+            `;
+
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.watchlist-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const symbol = btn.getAttribute('data-symbol');
+                    toggleWatchlist(symbol);
+                });
+            });
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Fetch assets from API
+        function fetchAssets() {
+            return new Promise((resolve) => {
+                // Simulate API call with sample data
+                setTimeout(() => {
+                    const sampleAssets = {
+                        stocks: [{
+                            symbol: "AAPL",
+                            name: "Apple Inc.",
+                            price: 189.25,
+                            change: 2.34,
+                            type: "stock",
+                            volume: 50000000,
+                            icon: "fab fa-apple"
+                        }, {
+                            symbol: "MSFT",
+                            name: "Microsoft Corp.",
+                            price: 345.67,
+                            change: 1.56,
+                            type: "stock",
+                            volume: 35000000,
+                            icon: "fab fa-microsoft"
+                        }, {
+                            symbol: "GOOGL",
+                            name: "Alphabet Inc.",
+                            price: 132.45,
+                            change: 3.21,
+                            type: "stock",
+                            volume: 20000000,
+                            icon: "fab fa-google"
+                        }, {
+                            symbol: "AMZN",
+                            name: "Amazon.com Inc.",
+                            price: 138.45,
+                            change: -0.87,
+                            type: "stock",
+                            volume: 40000000,
+                            icon: "fab fa-amazon"
+                        }, {
+                            symbol: "TSLA",
+                            name: "Tesla Inc.",
+                            price: 245.67,
+                            change: 5.43,
+                            type: "stock",
+                            volume: 60000000,
+                            icon: "fas fa-car"
+                        }, {
+                            symbol: "META",
+                            name: "Meta Platforms Inc.",
+                            price: 298.76,
+                            change: -1.23,
+                            type: "stock",
+                            volume: 30000000,
+                            icon: "fab fa-facebook"
+                        }, {
+                            symbol: "JPM",
+                            name: "JPMorgan Chase & Co.",
+                            price: 156.78,
+                            change: 0.98,
+                            type: "stock",
+                            volume: 25000000,
+                            icon: "fas fa-university"
+                        }, {
+                            symbol: "V",
+                            name: "Visa Inc.",
+                            price: 245.32,
+                            change: -0.56,
+                            type: "stock",
+                            volume: 15000000,
+                            icon: "fab fa-cc-visa"
+                        }, {
+                            symbol: "WMT",
+                            name: "Walmart Inc.",
+                            price: 163.45,
+                            change: 1.23,
+                            type: "stock",
+                            volume: 18000000,
+                            icon: "fas fa-shopping-cart"
+                        }, {
+                            symbol: "JNJ",
+                            name: "Johnson & Johnson",
+                            price: 167.89,
+                            change: -0.34,
+                            type: "stock",
+                            volume: 12000000,
+                            icon: "fas fa-pills"
+                        }],
+                        crypto: [{
+                            symbol: "BTC",
+                            name: "Bitcoin",
+                            price: 29356.78,
+                            change: 1.87,
+                            type: "crypto",
+                            volume: 15000000000,
+                            icon: "fab fa-bitcoin"
+                        }, {
+                            symbol: "ETH",
+                            name: "Ethereum",
+                            price: 1856.32,
+                            change: 3.21,
+                            type: "crypto",
+                            volume: 9000000000,
+                            icon: "fab fa-ethereum"
+                        }, {
+                            symbol: "BNB",
+                            name: "Binance Coin",
+                            price: 243.56,
+                            change: -0.45,
+                            type: "crypto",
+                            volume: 500000000,
+                            icon: "fas fa-coins"
+                        }, {
+                            symbol: "XRP",
+                            name: "Ripple",
+                            price: 0.6234,
+                            change: 5.32,
+                            type: "crypto",
+                            volume: 1200000000,
+                            icon: "fas fa-bolt"
+                        }, {
+                            symbol: "ADA",
+                            name: "Cardano",
+                            price: 0.3456,
+                            change: -1.23,
+                            type: "crypto",
+                            volume: 400000000,
+                            icon: "fas fa-leaf"
+                        }, {
+                            symbol: "DOGE",
+                            name: "Dogecoin",
+                            price: 0.0789,
+                            change: 12.34,
+                            type: "crypto",
+                            volume: 800000000,
+                            icon: "fas fa-dog"
+                        }, {
+                            symbol: "SOL",
+                            name: "Solana",
+                            price: 32.45,
+                            change: 4.56,
+                            type: "crypto",
+                            volume: 700000000,
+                            icon: "fas fa-fire"
+                        }, {
+                            symbol: "DOT",
+                            name: "Polkadot",
+                            price: 5.67,
+                            change: -2.34,
+                            type: "crypto",
+                            volume: 300000000,
+                            icon: "fas fa-circle-nodes"
+                        }, {
+                            symbol: "LTC",
+                            name: "Litecoin",
+                            price: 89.12,
+                            change: 1.23,
+                            type: "crypto",
+                            volume: 450000000,
+                            icon: "fab fa-bitcoin"
+                        }, {
+                            symbol: "MATIC",
+                            name: "Polygon",
+                            price: 0.8765,
+                            change: -0.98,
+                            type: "crypto",
+                            volume: 350000000,
+                            icon: "fas fa-shapes"
+                        }],
+                        forex: [{
+                            symbol: "EUR/USD",
+                            name: "Euro / US Dollar",
+                            price: 1.0925,
+                            change: 0.12,
+                            type: "forex",
+                            volume: 5000000000,
+                            icon: "fas fa-euro-sign"
+                        }, {
+                            symbol: "USD/JPY",
+                            name: "US Dollar / Japanese Yen",
+                            price: 144.89,
+                            change: -0.23,
+                            type: "forex",
+                            volume: 4000000000,
+                            icon: "fas fa-yen-sign"
+                        }, {
+                            symbol: "GBP/USD",
+                            name: "British Pound / US Dollar",
+                            price: 1.2765,
+                            change: 0.34,
+                            type: "forex",
+                            volume: 3500000000,
+                            icon: "fas fa-pound-sign"
+                        }, {
+                            symbol: "USD/CHF",
+                            name: "US Dollar / Swiss Franc",
+                            price: 0.8789,
+                            change: -0.15,
+                            type: "forex",
+                            volume: 2800000000,
+                            icon: "fas fa-franc-sign"
+                        }, {
+                            symbol: "AUD/USD",
+                            name: "Australian Dollar / US Dollar",
+                            price: 0.6623,
+                            change: 0.27,
+                            type: "forex",
+                            volume: 2200000000,
+                            icon: "fas fa-dollar-sign"
+                        }, {
+                            symbol: "USD/CAD",
+                            name: "US Dollar / Canadian Dollar",
+                            price: 1.3189,
+                            change: -0.18,
+                            type: "forex",
+                            volume: 1800000000,
+                            icon: "fas fa-dollar-sign"
+                        }],
+                        commodities: [{
+                            symbol: "GC",
+                            name: "Gold",
+                            price: 1945.67,
+                            change: 0.45,
+                            type: "commodity",
+                            volume: 50000000,
+                            icon: "fas fa-gem"
+                        }, {
+                            symbol: "SI",
+                            name: "Silver",
+                            price: 23.45,
+                            change: -0.32,
+                            type: "commodity",
+                            volume: 40000000,
+                            icon: "fas fa-coins"
+                        }, {
+                            symbol: "CL",
+                            name: "Crude Oil",
+                            price: 78.92,
+                            change: 1.23,
+                            type: "commodity",
+                            volume: 60000000,
+                            icon: "fas fa-gas-pump"
+                        }, {
+                            symbol: "NG",
+                            name: "Natural Gas",
+                            price: 2.78,
+                            change: -0.45,
+                            type: "commodity",
+                            volume: 35000000,
+                            icon: "fas fa-fire"
+                        }]
+                    };
+
+                    // Apply filter to sample data
+                    const filtered = filterAssets(sampleAssets[currentTab]);
+                    resolve(filtered);
+                }, 800);
+            });
+        }
+
+        // Fetch news from API
+        function fetchNews() {
+            return new Promise((resolve) => {
+                // Simulate API call with sample data
+                setTimeout(() => {
+                    // Generate news from the past week
+                    const sources = ["Bloomberg", "Financial Times", "Reuters", "CNBC", "Wall Street Journal", "CoinDesk"];
+                    const topics = [
+                        "Fed Signals Potential Rate Cuts Amid Cooling Inflation",
+                        "Tech Stocks Rally as AI Investments Surge",
+                        "Oil Prices Climb as OPEC+ Announces Production Cuts",
+                        "Cryptocurrency Market Sees Renewed Institutional Interest",
+                        "Global Supply Chains Stabilize After Years of Disruption",
+                        "Renewable Energy Investments Reach Record Highs",
+                        "Inflation Data Shows Signs of Cooling in Major Economies",
+                        "Major Bank Reports Strong Quarterly Earnings",
+                        "New Regulations Proposed for Crypto Exchanges",
+                        "Electric Vehicle Sales Exceed Expectations"
+                    ];
+
+                    const descriptions = [
+                        "The Federal Reserve indicates possible rate reductions later this year as inflation shows signs of easing.",
+                        "Major tech companies report increased revenue from AI services, driving sector growth.",
+                        "Global oil prices rise after OPEC+ countries agree to extend production cuts through Q3.",
+                        "Major financial institutions increase crypto investments despite regulatory uncertainty.",
+                        "Shipping and logistics networks return to pre-pandemic efficiency levels.",
+                        "Global investments in solar and wind power surpass fossil fuels for the first time.",
+                        "Consumer price index data shows inflation slowing in key markets including US and EU.",
+                        "One of the world's largest banks exceeds analyst expectations with strong Q2 results.",
+                        "Regulators propose new rules for cryptocurrency exchanges to enhance investor protection.",
+                        "Sales of electric vehicles surpass projections as consumer adoption accelerates."
+                    ];
+
+                    const recentNews = [];
+
+                    // Generate 20 news items from the past week
+                    for (let i = 0; i < 20; i++) {
+                        // Random date within the past week
+                        const daysAgo = Math.floor(Math.random() * 7);
+                        const hoursAgo = Math.floor(Math.random() * 24);
+                        const minutesAgo = Math.floor(Math.random() * 60);
+
+                        const publishedDate = new Date();
+                        publishedDate.setDate(publishedDate.getDate() - daysAgo);
+                        publishedDate.setHours(publishedDate.getHours() - hoursAgo);
+                        publishedDate.setMinutes(publishedDate.getMinutes() - minutesAgo);
+
+                        const source = sources[Math.floor(Math.random() * sources.length)];
+                        const topic = topics[Math.floor(Math.random() * topics.length)];
+                        const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+
+                        recentNews.push({
+                            title: topic,
+                            description: description,
+                            source: source,
+                            publishedDate: publishedDate.toISOString()
+                        });
+                    }
+
+                    // Sort by most recent first
+                    recentNews.sort((a, b) =>
+                        new Date(b.publishedDate) - new Date(a.publishedDate)
+                    );
+
+                    resolve(recentNews);
+                }, 800);
+            });
+        }
+
+        // Initialize charts
+        function initCharts() {
+            // Market Overview Chart
+            const marketCtx = document.getElementById('marketChart').getContext('2d');
+            marketChart = new Chart(marketCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    datasets: [{
+                        label: 'S&P 500',
+                        data: [4100, 4200, 4150, 4300, 4400, 4350, 4500],
+                        borderColor: '#4361ee',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'NASDAQ',
+                        data: [12500, 13000, 12800, 13500, 14000, 14200, 14500],
+                        borderColor: '#4cc9f0',
+                        backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#8b949e'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#8b949e'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Detail chart (for modal)
+            detailChart = new Chart(detailChartCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1M', '2M', '3M', '4M', '5M', '6M'],
+                    datasets: [{
+                        label: 'Price History',
+                        data: [170, 175, 168, 180, 182, 189],
+                        borderColor: '#4361ee',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#8b949e'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Comparison chart
+            comparisonChart = new Chart(comparisonChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Stocks',
+                        data: [12, 19, 3, 5, 2, 3],
+                        backgroundColor: '#4361ee',
+                    }, {
+                        label: 'Crypto',
+                        data: [2, 3, 5, 7, 6, 4],
+                        backgroundColor: '#4cc9f0',
+                    }, {
+                        label: 'Commodities',
+                        data: [3, 5, 7, 9, 4, 6],
+                        backgroundColor: '#2ec4b6',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#8b949e'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#8b949e'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update charts based on time range
+        function updateCharts(range) {
+            // This would normally fetch new data from API
+            // For demo, we'll just update with random data
+            const newData = Array.from({
+                length: 7
+            }, () => Math.random() * 1000 + 4000);
+
+            marketChart.data.datasets[0].data = newData;
+            marketChart.update();
+
+            const detailData = Array.from({
+                length: 6
+            }, () => Math.random() * 50 + 150);
+            detailChart.data.datasets[0].data = detailData;
+            detailChart.update();
+
+            // Update comparison chart
+            const compData = Array.from({
+                length: 6
+            }, () => Math.floor(Math.random() * 10) + 1);
+            const compData2 = Array.from({
+                length: 6
+            }, () => Math.floor(Math.random() * 10) + 1);
+            const compData3 = Array.from({
+                length: 6
+            }, () => Math.floor(Math.random() * 10) + 1);
+
+            comparisonChart.data.datasets[0].data = compData;
+            comparisonChart.data.datasets[1].data = compData2;
+            comparisonChart.data.datasets[2].data = compData3;
+            comparisonChart.update();
+        }
+
+        // Process and render data
+        function processData() {
+            // Update top performers (top 5 gainers)
+            const topPerformers = [...assetsData]
+                .sort((a, b) => b.change - a.change)
+                .slice(0, 5);
+
+            renderAssets(topPerformers, topPerformersEl);
+
+            // Filter and render full ranking
+            const filteredAssets = filterAssets(assetsData);
+            renderAssets(filteredAssets, fullRankingEl);
+
+            // Update asset count
+            assetCountEl.textContent = `${filteredAssets.length} assets`;
+        }
+
+        // Load initial data
+        async function loadData() {
+            // Fetch assets and news
+            assetsData = await fetchAssets();
+            newsData = await fetchNews();
+
+            // Process and render data
+            processData();
+            renderNews(newsData, newsGridEl);
+
+            // Set up news auto-refresh
+            setInterval(async() => {
+                newsData = await fetchNews();
+                renderNews(newsData, newsGridEl);
+
+                // Also update if all news modal is open
+                if (allNewsModal.style.display === 'flex') {
+                    renderAllNews(newsData, allNewsGridEl);
+                }
+            }, 60000); // Refresh every 60 seconds
+        }
+
+        // Initialize the dashboard
+        function initDashboard() {
+            initCharts();
+            updateTimestamp();
+            renderWatchlist();
+
+            // Add event listeners to filter buttons
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', async() => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    currentFilter = btn.getAttribute('data-filter');
+
+                    // Show loading state
+                    topPerformersEl.innerHTML = `
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                    `;
+
+                    fullRankingEl.innerHTML = `
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                    `;
+
+                    // Fetch new data
+                    assetsData = await fetchAssets();
+                    processData();
+                });
+            });
+
+            // Add event listeners to tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', async() => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    currentTab = tab.getAttribute('data-tab');
+
+                    // Show loading state
+                    topPerformersEl.innerHTML = `
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                    `;
+
+                    fullRankingEl.innerHTML = `
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                        <div class="asset-skeleton skeleton"></div>
+                    `;
+
+                    // Fetch new data
+                    assetsData = await fetchAssets();
+                    processData();
+                });
+            });
+
+            // Time range buttons
+            timeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    timeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const range = btn.getAttribute('data-range');
+                    updateCharts(range);
+                });
+            });
+
+            // Modal close button
+            closeModal.addEventListener('click', () => {
+                assetModal.style.display = 'none';
+            });
+
+            // News modal close button
+            closeNewsModal.addEventListener('click', () => {
+                allNewsModal.style.display = 'none';
+            });
+
+            // View all news button
+            viewAllNewsBtn.addEventListener('click', async(e) => {
+                e.preventDefault();
+                allNewsModal.style.display = 'flex';
+                allNewsGridEl.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Loading news articles...</p></div>';
+
+                // Fetch news if not already loaded
+                if (newsData.length === 0) {
+                    newsData = await fetchNews();
+                }
+                renderAllNews(newsData, allNewsGridEl);
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === assetModal) {
+                    assetModal.style.display = 'none';
+                }
+                if (e.target === allNewsModal) {
+                    allNewsModal.style.display = 'none';
+                }
+                if (e.target === watchlistModal) {
+                    watchlistModal.style.display = 'none';
+                }
+            });
+
+            // Add to watchlist from modal
+            addToWatchlistBtn.addEventListener('click', () => {
+                if (currentAsset) {
+                    toggleWatchlist(currentAsset.symbol);
+                    assetModal.style.display = 'none';
+                }
+            });
+
+            // Open watchlist modal
+            openWatchlistModalBtn.addEventListener('click', () => {
+                watchlistModal.style.display = 'flex';
+                renderWatchlistModal();
+            });
+
+            // Close watchlist modal
+            closeWatchlistModal.addEventListener('click', () => {
+                watchlistModal.style.display = 'none';
+            });
+
+            // Update timestamp every minute
+            setInterval(updateTimestamp, 60000);
+
+            // Initialize with data
+            loadData();
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+
+</html>
